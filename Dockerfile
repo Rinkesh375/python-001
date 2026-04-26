@@ -1,24 +1,17 @@
-# Base image (OS)
+# Use official lightweight Python image (smaller size)
+FROM python:3.11.15-slim-trixie
 
-FROM python:3.14-slim
-
-# Working directory
-
+# Set working directory inside container
 WORKDIR /app
 
-# Copy src code to container
-
+# Copy all files from current directory to container
 COPY . .
 
-# Run the build commands
-
+# Install dependencies from requirements.txt
 RUN pip install -r requirements.txt
 
-# expose port 80
-
+# Expose port 80 (app will run on this port)
 EXPOSE 80
 
-# serve the app / run the app (keep it running)
-
-CMD ["python","run.py"]
-
+# Run the application when container starts
+CMD ["python", "run.py"]
