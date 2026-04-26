@@ -1,0 +1,39 @@
+# -------- Stage 1: Builder --------
+# Use Python base image to install dependencies
+
+FROM python:3.11.15-slim-trixie AS builder
+
+# Set working directory inside container
+WORKDIR /app
+
+# Copy all project files into container
+COPY . .
+
+# Install dependencies into a custom folder (/app/deps)
+# --target is used so we can copy only required libs to final image
+RUN pip install -r requirements.txt --target=/app/deps
+
+
+# -------- Stage 2: Final (Distroless) --------
+# Use minimal distroless image (no OS tools, only runtime)
+FROM gcr.io/distroless/python3-debian12 AS final-stage
+
+# Set working directory
+WORKDIR /app
+
+# Copy installed dependencies from builder stage
+COPY --from=builder /app/deps /app/deps
+
+# Copy application source code from builder stage
+COPY --from=builder /app /app
+
+# Tell Python where dependencies are located
+ENV PYTHONPATH="/app/deps"
+
+
+EXPOSE 80
+
+# (IMPORTANT) Distroless has no default shell or python command
+# You must explicitly define how to run your app
+
+CMD ["run.py"]
